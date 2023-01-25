@@ -72,11 +72,26 @@ class DatabaseStorage:
         """
             returns a file descripter if a collection_name was provided.
         """
+        def empty_file(name):
+            import datetime
+            payload = {
+                "_metadata" : {
+                    "collection_name" : name,
+                    "creation_time" : datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                }, 
+                "_data" : []
+            }
+            return payload
         if collection_name:
             if not os.path.exists(f'{self.database}/{collection_name}.json')\
                 or os.stat(f'{self.database}/{collection_name}.json').st_size == 0:
+                import datetime
                 fd = open(f'{self.database}/{collection_name}.json', "w+")
-                self.storage = json.loads("{}")
+                self.storage = json.loads('''{
+                    "_metadata": {"collection_name": "%s", "creation_time": "%s"},
+                    "_data" : []
+                }'''%(collection_name, datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")))
+                # import pdb; pdb.set_trace()
             else:
                 fd = open(f'{self.database}/{collection_name}.json', "a+")
                 fd.seek(0)
