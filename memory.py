@@ -32,7 +32,8 @@ class DatabaseStorage:
     Each collection will have one or more documents (a JSON structure)
     """
     database = ''
-    descriptor = None
+    storage = None
+    collection_name = None
     def create_directory(self,directory_path):
         """
         Provide an absolute path for the directory that is to be created.
@@ -55,7 +56,11 @@ class DatabaseStorage:
         """
         list_of_db = ListOfDatabases()
         if database_name in list_of_db.get_database_names():
-            raise Exception("Database already exists, choose a different name")
+            # Need to validate that the directory exists in the location specified
+            if not os.path.exists(database_location):
+                raise Exception("Database already exists as a different location, \
+                    choose a different name or change the location")
+
         if self.create_directory(f'{database_location}/{database_name}/'):
             list_of_db.add_database_names(database_name)
             # Now if we need to create/update/read a collection, we shall do so.
@@ -68,37 +73,20 @@ class DatabaseStorage:
             returns a file descripter if a collection_name was provided.
         """
         if collection_name:
-            fd = open(f'{self.database}/{collection_name}.json', 'a+')
-            fd.seek(0)
-            self.descriptor = fd
+            if not os.path.exists(f'{self.database}/{collection_name}.json')\
+                or os.stat(f'{self.database}/{collection_name}.json').st_size == 0:
+                fd = open(f'{self.database}/{collection_name}.json', "w+")
+                self.storage = json.loads("{}")
+            else:
+                fd = open(f'{self.database}/{collection_name}.json', "a+")
+                fd.seek(0)
+                self.storage = json.load(fd)
+            self.collection_name = collection_name
 
-    
-    # def touch(fname, times=None, create_dirs=False):
-    #     if create_dirs:
-    #         base_dir = os.path.dirname(fname)
-    #         if not os.path.exists(base_dir):
-    #             os.makedirs(base_dir)
-    #     with open(fname, 'a'):
-    #         os.utime(fname, times)
-
-    # def close(self):
-    #     self._handle.close()
-
-    # def read(self):
-    #     # Get the file size
-    #     self._handle.seek(0, os.SEEK_END)
-    #     size = self._handle.tell()
-
-    #     if not size:
-    #         # File is empty
-    #         return None
-    #     else:
-    #         self._handle.seek(0)
-    #         return json.load(self._handle)
-
-    # def write(self, data):
-    #     self._handle.seek(0)
-    #     serialized = json.dumps(data, **self.kwargs)
-    #     self._handle.write(serialized)
-    #     self._handle.flush()
-    #     self._handle.truncate()
+    def write_file(self):
+        """
+            Write the contents of self.storage to the file.
+        """
+        json.dump(self.storage, 
+            open(f'{self.database}/{self.collection_name}.json', 'w'),
+            indent=4)
