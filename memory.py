@@ -20,7 +20,8 @@ class ListOfDatabases:
         return self.databases
     
     def add_database_names(self, new_database_name):
-        self.descripter.write(f'{new_database_name}\n')
+        if new_database_name not in self.databases:
+            self.descripter.write(f'{new_database_name}\n')
     
     def close_database_names(self):
         self.descripter.close()
@@ -91,7 +92,6 @@ class DatabaseStorage:
                     "_metadata": {"collection_name": "%s", "creation_time": "%s"},
                     "_data" : []
                 }'''%(collection_name, datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")))
-                # import pdb; pdb.set_trace()
             else:
                 fd = open(f'{self.database}/{collection_name}.json', "a+")
                 fd.seek(0)
