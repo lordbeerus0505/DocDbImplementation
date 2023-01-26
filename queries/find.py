@@ -11,19 +11,25 @@ class FindQuery:
         
     def handle_eq(self,data, field, val):
         for ele in data:
-            if ele[field] == val:
+            if field in ele and ele[field] == val:
                 self.select_results.append(ele)
 
 
     def handle_gt(self, data, field, val):
         for ele in data:
-            if ele[field] > val:
+            if field in ele and  ele[field] > val:
                 self.select_results.append(ele)
 
     def handle_lt(self, data, field, val):
         for ele in data:
-            if ele[field] < val:
+            if field in ele and ele[field] < val:
                 self.select_results.append(ele)
+    
+    def handle_ne(self, data, field, val):
+        for ele in data:
+            if field in ele and ele[field] != val:
+                self.select_results.append(ele)
+        
 
     def find_handler(self, collection, select_query, project_query):
         """
@@ -33,8 +39,7 @@ class FindQuery:
 
         """
         # First select the results
-        # TODO: Support more than 1 query condition. Currently it handles just one.
-        # TODO: Support more than 1 constraint.
+        # TODO: Support more than 1 query condition. Currently it handles just one. Handle AND, OR
         data = collection['_data']
         for field, constraints in select_query.items():
             print(field, constraints)
@@ -47,7 +52,17 @@ class FindQuery:
                     self.handle_gt(data, field, v)
                 elif k == 'lt':
                     self.handle_lt(data, field, v)
-                # TODO: Add support for GEQ and LEQ where you just club the results of eq and gt or lt
+                elif k == 'ne':
+                    self.handle_ne(data, field, v)
+                elif k == 'geq':
+                    self.handle_gt(data, field, v)
+                    self.handle_eq(data, field, v)
+                elif k == 'leq':
+                    self.handle_lt(data, field, v)
+                    self.handle_eq(data, field, v)
+                else:
+                    # No Match
+                    raise Exception("Invalid constraint, check query")
 
         
         # Now to project the results

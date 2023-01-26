@@ -13,7 +13,7 @@ class QueryHandler:
     def handle_query(self, query_type: str, query: list, collection: json):
         """
         A possible input:
-        db.collection.find(where name == 'tom')
+        db.collection.find(name eq tom)
 
         """
         if query_type == 'find':
