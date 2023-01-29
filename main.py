@@ -15,8 +15,15 @@ db = DatabaseStorage('/Users/abhiram/Spring23/databases/project/DocDbImplementat
 q = QueryHandler()
 q.handle_query('find', [
     ({'new pikaa' : {
-                        'ne': 'cheekoo'
-                    }
+                    "OR" :[
+                        {
+                            'leq': 'cheekoo'
+                        }, 
+                        {   
+                            'gt' : 'tom'
+                        }
+                    ]
+                }
     }),
     {'new pikaa' : 1, 'pokemon_names': 1}
 ], db.storage)

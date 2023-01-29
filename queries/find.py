@@ -29,6 +29,71 @@ class FindQuery:
         for ele in data:
             if field in ele and ele[field] != val:
                 self.select_results.append(ele)
+    
+    def operate(self, op, X, Y):
+        if op == 'eq':
+            return X == Y
+        elif op == 'ne':
+            return X != Y
+        elif op == 'gt':
+            return X > Y
+        elif op == 'lt':
+            return X < Y
+        elif op == 'geq':
+            return X >= Y
+        elif op == 'leq':
+            return X <= Y
+        else:
+            raise Exception("Invalid operator")
+    
+    def handle_and(self, data, field, constraints):
+        """
+        Handles the AND operator. To do so, performing an intersection of all the results across constraints.
+        Since these are dictionary entries, cannot perform an intersection directly. Instead, we must store
+        just the _id as a key and perform intersection on that.
+        """
+        res = set()
+        data_map = dict()
+        for ele in data:
+            res.add(ele["_id"])
+            data_map[ele["_id"]] = ele
+        # Now intersect res with the results of each
+        
+        
+        for constraint in constraints:
+            row = set()
+            for k,v in constraint.items(): # O(1) as only 1 KV pair
+                for ele in data:
+                    if field in ele and self.operate(k, ele[field], v):
+                        row.add(ele['_id'])
+
+            res = res.intersection(row)
+
+        for element in res:
+            self.select_results.append(data_map[element])
+
+    def handle_or(self, data, field, constraints):
+        """
+            Handles the OR operator. Performs a union of all the results by simply using a set
+            This helps prevent having duplicates
+        """
+        res = set()
+        data_map = dict() # populating the dictionary only for matching rows as its pointless otherwise 
+
+        for constraint in constraints:
+            row = set()
+            for k,v in constraint.items(): # O(1) as only 1 KV pair
+                for ele in data:
+                    if field in ele and self.operate(k, ele[field], v):
+                        row.add(ele['_id'])
+                        data_map[ele["_id"]] = ele
+
+            res = res.union(row)
+        
+        for element in res:
+            self.select_results.append(data_map[element])
+
+            
         
 
     def find_handler(self, collection, select_query, project_query):
@@ -60,6 +125,15 @@ class FindQuery:
                 elif k == 'leq':
                     self.handle_lt(data, field, v)
                     self.handle_eq(data, field, v)
+                elif k == 'AND' :
+                    # The value should be a list, else raise exception
+                    if not isinstance(v, list):
+                        raise Exception("Expected a list")
+                    self.handle_and(data, field, v)
+                elif k == 'OR':
+                    if not isinstance(v, list):
+                        raise Exception("Expected a list")
+                    self.handle_or(data, field, v)
                 else:
                     # No Match
                     raise Exception("Invalid constraint, check query")
