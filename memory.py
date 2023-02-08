@@ -49,7 +49,7 @@ class DatabaseStorage:
         self.database = directory_path
         return True
 
-    def __init__(self, database_location, database_name, collection_name=None):
+    def __init__(self, database_location='./', database_name='database1', collection_name=None):
         """
         Database_location provides path of the directory where the database is to be stored
         Collection_name is the name of the collection to create if any. Its possible that

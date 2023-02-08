@@ -11,11 +11,11 @@ class Insert:
     def __init__(self) -> None:
         pass
 
-    def insert_one(self, database, collection_name, payload):
+    def insert_one(self, database, collection_name, payload, database_location = './'):
         if "_id" not in payload:
             payload['_id']= ''.join(random.choices(string.ascii_letters + string.digits, k=38))
         # creates the database and the collection if they dont exist as well.
-        db = DatabaseStorage('./', database_name= database, collection_name= collection_name)
+        db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name)
         if '_data' not in db.storage:
             raise Exception("Issues with the collection")
         db.storage['_data'].append(payload)
