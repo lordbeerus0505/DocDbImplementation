@@ -4,6 +4,8 @@ each type of handler based on the query.
 """
 import json
 from .find import FindQuery
+from .lookup import LookUp
+
 class QueryHandler:
     query_request = None
     query_response = None
@@ -21,3 +23,7 @@ class QueryHandler:
             fq.find_handler(collection, *query)
             print(fq.project_results)
             pass
+        if query_type == 'lookup':
+            lq = LookUp(collection, *query)
+            lq.lookup_handler(collection)
+            print(json.dumps(lq.lookup_results, indent=4))
