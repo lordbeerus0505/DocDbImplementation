@@ -21,9 +21,9 @@ class QueryHandler:
         if query_type == 'find':
             fq = FindQuery()
             fq.find_handler(collection, *query)
-            print(fq.project_results)
+            print(json.dumps(fq.project_results, indent=4))
             pass
-        if query_type == 'lookup':
+        elif query_type == 'lookup':
             lq = LookUp(collection, *query)
             lq.lookup_handler(collection)
             print(json.dumps(lq.lookup_results, indent=4))
