@@ -138,7 +138,6 @@ class FindQuery:
                     # No Match
                     raise Exception("Invalid constraint, check query")
 
-        
         # Now to project the results
         for ele in self.select_results:
             tupl = {}
