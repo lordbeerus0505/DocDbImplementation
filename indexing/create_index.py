@@ -36,6 +36,11 @@ class CreateIndex:
                             self.index_storage[index].append(doc)
                         else:
                             self.index_storage[index] = [doc]
+                    if len(data) > 1: # more than 1 word, store entire string also to map to this document
+                        if doc[field] in self.index_storage:
+                            self.index_storage[doc[field]].append(doc)
+                        else:
+                            self.index_storage[doc[field]] = [doc]
         # print(self.index_storage)
         self.write_index_file()
 
@@ -49,7 +54,7 @@ class CreateIndex:
         This is true for text search may not be true for the others so implementers do think about it.
         """
         self.db = DatabaseStorage(database_location=self.database_location, database_name=self.database_name, collection_name=self.collection_name)
-        self.collection_index_name = f'{self.collection_name}_{index_type}.json'
+        self.collection_index_name = f'{self.collection_name}_{index_type}_index.json'
         self.create_index_file()
         if index_type == SEARCH:
             self.handle_search()

@@ -8,13 +8,16 @@ sys.path.append('../../')
 from cmd import Cmd
 import re
 import os
+import ast
 import json
 from memory import DatabaseStorage
 from queries.queryhandler import QueryHandler
 from crud.insert import Insert
 from crud.update import Update
 from crud.delete import Delete
-from constants import *
+from indexing.text_search import TextSearch
+from indexing.create_index import CreateIndex
+from interface.constants import *
 class CLI(Cmd):
     prompt = '> '
     intro = "Welcome to DocsDB-I1! Type ? to list commands"
@@ -37,8 +40,8 @@ class CLI(Cmd):
         if os.path.isfile(path):
             return []
 
-        #add dir to directorylist if it contains .txt files
-        if len([f for f in os.listdir(path) if f.endswith('.json')])>0:
+        #add dir to directorylist if it contains .json files
+        if len([f for f in os.listdir(path) if f.endswith('.json') and 'indexes' not in path])>0:
             directoryList.append(path.split('./')[1])
 
         for d in os.listdir(path):
@@ -160,6 +163,24 @@ class CLI(Cmd):
                 payload = json.loads(rest[0])
                 delete = Delete()
                 delete.delete_one(database=self.db_name, collection_name=self.collection_name, payload=payload)
+            elif oprn == SEARCH:
+                # Just a single word
+                payload = rest[0][1:-1]
+                if type(payload)!= str:
+                    print("Requires a single word to search")
+                else:
+                    ts = TextSearch(database_name=self.db_name, collection_name=self.collection_name, word_to_search=payload)
+                    ts.search()
+            elif oprn == C_INDX:
+                # payload is a list of fields
+                try:
+                    payload = ast.literal_eval(rest[0])
+                    index = CreateIndex(database_name=self.db_name, collection_name=self.collection_name, fields=payload)
+                    index.populate_index(SEARCH)
+                except:
+                    print("Require a list of fields")
+
+                
             #  TODO: ADD NEW OPERATIONS HERE.
 
 cli = CLI()

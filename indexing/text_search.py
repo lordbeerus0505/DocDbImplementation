@@ -12,7 +12,7 @@ class TextSearch:
         self.word_to_search = word_to_search
 
     def preprocess(self):
-        self.collection_index_name = f'{self.collection_name}_search.json'
+        self.collection_index_name = f'{self.collection_name}_search_index.json'
         file_path = f'{self.database_location}/{self.database_name}/{INDEXES}/{self.collection_index_name}'
         fd = open(file_path, 'a+')
         fd.seek(0)
