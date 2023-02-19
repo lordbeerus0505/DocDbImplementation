@@ -15,11 +15,13 @@ class Delete:
             # Delete those creations in the future.
             if db.storage['_data'] == []:
                 raise Exception("Empty Collection")
-            for i,entry in enumerate(db.storage['_data']):
-                if payload['_id'] == entry['_id']:
-                    db.storage["_data"].pop(i)
-                    db.write_file()
-                    return "OK"
+            if payload['_id'] in db.storage["_data"]:
+                db.storage["_data"].pop(payload['_id'])
+            # for i,entry in enumerate(db.storage['_data']):
+            #     if payload['_id'] == entry['_id']:
+            #         db.storage["_data"].pop(i)
+                db.write_file()
+                return "OK"
 
             raise Exception("Key not found")
 
