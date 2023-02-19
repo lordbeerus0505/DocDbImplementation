@@ -80,7 +80,7 @@ class DatabaseStorage:
                 fd = open(f'{self.database}/{collection_name}.json', "w+")
                 self.storage = json.loads('''{
                     "_metadata": {"collection_name": "%s", "creation_time": "%s"},
-                    "_data" : []
+                    "_data" : {}
                 }'''%(collection_name, datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")))
             else:
                 fd = open(f'{self.database}/{collection_name}.json', "a+")

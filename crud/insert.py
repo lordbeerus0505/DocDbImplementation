@@ -18,12 +18,12 @@ class Insert:
         if "_id" not in payload:
             payload['_id']= ''.join(random.choices(string.ascii_letters + string.digits, k=38))
         # Make sure the '_id' isnt in the database already, if it is, raise Exception
-        for i,entry in enumerate(db.storage['_data']):
-            if payload['_id'] == entry['_id']:
+        for i, id in enumerate(db.storage['_data']):
+            if payload['_id'] == id:
                 raise Exception('Key Conflict, Alter the Primary Key and try again')
         if '_data' not in db.storage:
             raise Exception("Issues with the collection")
-        db.storage['_data'].append(payload)
+        db.storage['_data'][payload['_id']] = payload
         db.write_file()
         return "OK"
     
@@ -36,9 +36,9 @@ class Insert:
             if "_id" not in payload:
                 payload['_id']= ''.join(random.choices(string.ascii_letters + string.digits, k=38))
             # Make sure the '_id' isnt in the database already, if it is, raise Exception
-            for i,entry in enumerate(db.storage['_data']):
-                if payload['_id'] == entry['_id']:
+            for i, id in enumerate(db.storage['_data']):
+                if payload['_id'] == id:
                     raise Exception('Key Conflict, Alter the Primary Key and try again')
-            db.storage['_data'].append(payload)
+            db.storage['_data'][payload['_id']] = payload
         db.write_file()
         return "OK"

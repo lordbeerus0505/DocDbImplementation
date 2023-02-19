@@ -10,23 +10,23 @@ class FindQuery:
         self.project_results = []
         
     def handle_eq(self,data, field, val):
-        for ele in data:
+        for _, ele in data.items():
             if field in ele and ele[field] == val:
                 self.select_results.append(ele)
 
 
     def handle_gt(self, data, field, val):
-        for ele in data:
+        for _, ele in data.items():
             if field in ele and  ele[field] > val:
                 self.select_results.append(ele)
 
     def handle_lt(self, data, field, val):
-        for ele in data:
+        for _, ele in data.items():
             if field in ele and ele[field] < val:
                 self.select_results.append(ele)
     
     def handle_ne(self, data, field, val):
-        for ele in data:
+        for _, ele in data.items():
             if field in ele and ele[field] != val:
                 self.select_results.append(ele)
     
@@ -54,7 +54,7 @@ class FindQuery:
         """
         res = set()
         data_map = dict()
-        for ele in data:
+        for _, ele in data.items():
             res.add(ele["_id"])
             data_map[ele["_id"]] = ele
         # Now intersect res with the results of each
@@ -63,7 +63,7 @@ class FindQuery:
         for constraint in constraints:
             row = set()
             for k,v in constraint.items(): # O(1) as only 1 KV pair
-                for ele in data:
+                for _, ele in data.items():
                     if field in ele and self.operate(k, ele[field], v):
                         row.add(ele['_id'])
 
@@ -83,7 +83,7 @@ class FindQuery:
         for constraint in constraints:
             row = set()
             for k,v in constraint.items(): # O(1) as only 1 KV pair
-                for ele in data:
+                for _, ele in data.items():
                     if field in ele and self.operate(k, ele[field], v):
                         row.add(ele['_id'])
                         data_map[ele["_id"]] = ele
@@ -107,7 +107,6 @@ class FindQuery:
         # TODO: Support more than 1 query condition. Currently it handles just one. Handle AND, OR
         data = collection['_data']
         for field, constraints in select_query.items():
-            print(field, constraints)
             # import pdb; pdb.set_trace()
             # TODO: index to prevent linear search
             for k,v in constraints.items():

@@ -17,12 +17,11 @@ class Update:
             # Delete those creations in the future.
             if db.storage['_data'] == []:
                 raise Exception("Empty Collection")
-            for i,entry in enumerate(db.storage['_data']):
-                if payload['_id'] == entry['_id']:
-                    db.storage['_data'].pop(i)
-                    db.storage['_data'].append(payload)
-                    db.write_file()
-                    return "OK"
+
+            if payload['_id'] in db.storage['_data']:
+                db.storage['_data'][payload['_id']] = payload
+                db.write_file()
+                return "OK"
 
             raise Exception("Key not found")
 
