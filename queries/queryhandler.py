@@ -12,7 +12,7 @@ class QueryHandler:
     def __init__(self) -> None:
         pass
 
-    def handle_query(self, query_type: str, query: list, collection: json):
+    def handle_query(self, query_type: str, query: list, collection: json, return_as_json:bool = False):
         """
         A possible input:
         db.collection.find(name eq tom)
@@ -22,6 +22,8 @@ class QueryHandler:
             fq = FindQuery()
             fq.find_handler(collection, *query)
             print(json.dumps(fq.project_results, indent=4))
+            if return_as_json:
+                return fq.project_results
         elif query_type == 'lookup':
             lq = LookUp(collection, *query)
             lq.lookup_handler(collection)
