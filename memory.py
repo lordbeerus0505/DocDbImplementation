@@ -1,5 +1,6 @@
 import json
 import os
+import bson
 
 class ListOfDatabases:
     """
@@ -74,24 +75,26 @@ class DatabaseStorage:
             returns a file descripter if a collection_name was provided.
         """
         if collection_name:
-            if not os.path.exists(f'{self.database}/{collection_name}.json')\
-                or os.stat(f'{self.database}/{collection_name}.json').st_size == 0:
+            if not os.path.exists(f'{self.database}/{collection_name}.bson')\
+                or os.stat(f'{self.database}/{collection_name}.bson').st_size == 0:
                 import datetime
-                fd = open(f'{self.database}/{collection_name}.json', "w+")
+                fd = open(f'{self.database}/{collection_name}.bson', "wb")
+                fd.close() # just create a file so another request to same method doesnt end up here.
                 self.storage = json.loads('''{
                     "_metadata": {"collection_name": "%s", "creation_time": "%s"},
                     "_data" : {}
                 }'''%(collection_name, datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")))
             else:
-                fd = open(f'{self.database}/{collection_name}.json', "a+")
-                fd.seek(0)
-                self.storage = json.load(fd)
+
+                with open(f'{self.database}/{collection_name}.bson', "rb") as f:
+                    self.storage = bson.BSON.decode(f.read())
             self.collection_name = collection_name
 
     def write_file(self):
         """
             Write the contents of self.storage to the file.
         """
-        json.dump(self.storage, 
-            open(f'{self.database}/{self.collection_name}.json', 'w'),
-            indent=4)
+
+        data = bson.BSON.encode(self.storage)
+        with open(f'{self.database}/{self.collection_name}.bson', 'wb') as f:
+            f.write(data)
