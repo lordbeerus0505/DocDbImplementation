@@ -95,3 +95,19 @@ class DatabaseStorage:
         json.dump(self.storage, 
             open(f'{self.database}/{self.collection_name}.json', 'w'),
             indent=4)
+
+# TODO: Need to standardize the two storage classes
+class MemoryStorage:
+    """
+    Similar to InMemory storage in MongoDB
+    Collections are stored in Memory - Additional option to write to disk is given
+    """
+    def __init__(self):
+        self.storage = dict()
+
+    def read(self):
+        return self.storage
+
+    def write(self, data):
+        self.storage = data
+
