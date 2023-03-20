@@ -42,11 +42,12 @@ class Insert:
         if "_id" not in payload:
             payload['_id']= ''.join(random.choices(string.ascii_letters + string.digits, k=38))
         # Make sure the '_id' isnt in the database already, if it is, raise Exception
-        for i, id in enumerate(self.db.storage['_data']):
-            if payload['_id'] == id:
-                raise Exception('Key Conflict, Alter the Primary Key and try again')
         if '_data' not in self.db.storage:
             raise Exception("Issues with the collection")
+        
+        if payload['_id'] in self.db.storage['_data'].keys():
+            raise Exception('Key Conflict, Alter the Primary Key and try again')
+        
         self.db.storage['_data'][payload['_id']] = payload
         if not group_commit:
             self.db.write_file()
@@ -61,9 +62,10 @@ class Insert:
             if "_id" not in payload:
                 payload['_id']= ''.join(random.choices(string.ascii_letters + string.digits, k=38))
             # Make sure the '_id' isnt in the database already, if it is, raise Exception
-            for i, id in enumerate(db.storage['_data']):
-                if payload['_id'] == id:
-                    raise Exception('Key Conflict, Alter the Primary Key and try again')
+            if '_data' not in self.db.storage:
+                raise Exception("Issues with the collection")
+            if payload['_id'] in self.db.storage['_data'].keys():
+                raise Exception('Key Conflict, Alter the Primary Key and try again')
             db.storage['_data'][payload['_id']] = payload
         if not group_commit:
             db.write_file()
