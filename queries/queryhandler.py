@@ -12,7 +12,7 @@ class QueryHandler:
     def __init__(self) -> None:
         pass
 
-    def handle_query(self, query_type: str, query: list, collection: json, return_as_json:bool = False):
+    def handle_query(self, query_type: str, query: list, collection: json, return_as_json:bool = False, op = None):
         """
         A possible input:
         db.collection.find(name eq tom)

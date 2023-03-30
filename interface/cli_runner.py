@@ -4,7 +4,7 @@ This file will handle hosting the command line tool.
 import sys
 sys.path.append('./')
 sys.path.append('../')
-sys.path.append('../../')
+# sys.path.append('../../')
 from cmd import Cmd
 import re
 import os
@@ -18,6 +18,7 @@ from crud.delete import Delete
 from indexing.text_search import TextSearch
 from indexing.create_index import CreateIndex
 from interface.constants import *
+import string
 class CLI(Cmd):
     prompt = '> '
     intro = "Welcome to DocsDB-I1! Type ? to list commands"
@@ -41,7 +42,7 @@ class CLI(Cmd):
             return []
 
         #add dir to directorylist if it contains .json files
-        if len([f for f in os.listdir(path) if f.endswith('.json') and 'indexes' not in path])>0:
+        if len([f for f in os.listdir(path) if f.endswith('.bson') and 'indexes' not in path])>0:
             directoryList.append(path.split('./')[1])
 
         for d in os.listdir(path):
@@ -179,7 +180,22 @@ class CLI(Cmd):
                     index.populate_index(SEARCH)
                 except:
                     print("Require a list of fields")
+            elif oprn == LOOKUP:
+                lookup_str = rest[0]
+                lookup_str.strip("()")
+                print(lookup_str)
+                lookup_dict = json.loads(lookup_str)
+                from_collection = lookup_dict['from']
+                local_field = lookup_dict['localField']
+                foreign_field = lookup_dict['foreignField']
+                as_field = lookup_dict['as']
+                type = lookup_dict['type']
 
+                col2 = DatabaseStorage(database_name=self.db_name, collection_name=from_collection)
+                col1 = DatabaseStorage(database_name=self.db_name, collection_name=self.collection_name)
+
+                q = QueryHandler()
+                q.handle_query('lookup', [col2.storage, local_field, foreign_field, as_field, type], col1.storage)
                 
             #  TODO: ADD NEW OPERATIONS HERE.
 
