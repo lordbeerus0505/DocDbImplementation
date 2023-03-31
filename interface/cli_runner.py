@@ -179,7 +179,10 @@ class CLI(Cmd):
                     index.populate_index(SEARCH)
                 except:
                     print("Require a list of fields")
-
+            elif oprn == GROUPBY:
+                q = QueryHandler()
+                groupby, proj = self.extract_sel_proj(rest[0])
+                q.handle_query(oprn,[json.loads(groupby),json.loads(proj)], self.db.storage)
                 
             #  TODO: ADD NEW OPERATIONS HERE.
 
