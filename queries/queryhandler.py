@@ -27,4 +27,41 @@ class QueryHandler:
         elif query_type == 'lookup':
             lq = LookUp(collection, *query)
             lq.lookup_handler(collection)
-            print(json.dumps(lq.lookup_results, indent=4))
+            print(json.dumps(lq.lookup_results, indent=4))        
+        elif query_type == 'group':
+            gbq = GroupByQuery()
+            gbq.groupby_handler(collection, *query)
+            print(gbq.project_results)
+            pass
+        
+        elif query_type == 'complex':
+            chosen_data = collection
+            metadata = collection["_metadata"]
+            # print (metadata)
+            for count, q in enumerate(query):
+                if count < len(query) - 1:
+                    [(oprn,val)] = q.items()
+
+                    if count == len(query) - 2:
+                        oprn_query = [val,query[-1]]
+                    else:
+                        oprn_query = [val,{}]
+                    
+                    if oprn == 'find':
+                        # print ("Data before find -", chosen_data)
+                        fq = FindQuery()
+                        fq.find_handler(chosen_data, *oprn_query)
+                        chosen_data = {"_metadata":metadata, "_data" : fq.select_results}
+                        result = fq.project_results
+                        # print ("Data after find -", chosen_data)
+
+                    elif oprn == 'group':
+                        # print ("Data before groupby - ", chosen_data)
+                        gbq = GroupByQuery()
+                        gbq.groupby_handler(chosen_data, *oprn_query)
+                        chosen_data = {"_metadata":metadata, "_data" : gbq.group_results}
+                        result = gbq.project_results
+                        # print ("Data after groupby - ", chosen_data)
+            
+            print (result)            
+            pass
