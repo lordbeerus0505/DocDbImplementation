@@ -63,7 +63,6 @@ class GroupByQuery:
         # First select the results
         # TODO: Support more than 1 query condition. Currently it handles just one. Handle AND, OR
         data = collection['_data']
-        # print (data)
         for field, constraints in group_query.items():
             if field == "_id":
                 self.grouping(constraints, data)
