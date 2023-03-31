@@ -196,6 +196,10 @@ class CLI(Cmd):
 
                 q = QueryHandler()
                 q.handle_query('lookup', [col2.storage, local_field, foreign_field, as_field, type], col1.storage)
+            elif oprn == GROUPBY:
+                q = QueryHandler()
+                groupby, proj = self.extract_sel_proj(rest[0])
+                q.handle_query(oprn,[json.loads(groupby),json.loads(proj)], self.db.storage)
                 
             #  TODO: ADD NEW OPERATIONS HERE.
 

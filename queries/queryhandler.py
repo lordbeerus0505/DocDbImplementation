@@ -5,6 +5,8 @@ each type of handler based on the query.
 import json
 from .find import FindQuery
 from .lookup import LookUp
+from .groupby import GroupByQuery
+from .complex import ComplexQuery
 
 class QueryHandler:
     query_request = None
@@ -27,4 +29,17 @@ class QueryHandler:
         elif query_type == 'lookup':
             lq = LookUp(collection, *query)
             lq.lookup_handler(collection)
-            print(json.dumps(lq.lookup_results, indent=4))
+            print(json.dumps(lq.lookup_results, indent=4))        
+        elif query_type == 'group':
+            gbq = GroupByQuery()
+            gbq.groupby_handler(collection, *query)
+            print(gbq.project_results)
+            pass
+        
+        elif query_type == 'complex':
+            chosen_data = collection
+            metadata = collection["_metadata"]
+            cq = ComplexQuery()
+            result = cq.complex_handler(chosen_data, *query)
+            print (result)            
+            pass
