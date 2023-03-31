@@ -50,11 +50,12 @@ class DatabaseStorage:
         self.database = directory_path
         return True
 
-    def __init__(self, database_location='./', database_name='database1', collection_name=None):
+    def __init__(self, database_location='./', database_name='database1', collection_name=None, index_keys = None):
         """
         Database_location provides path of the directory where the database is to be stored
         Collection_name is the name of the collection to create if any. Its possible that
-        we want to just create a database without creating a collection
+        we want to just create a database without creating a collection. Option is given to create
+        index for a collection on creation.
         """
         list_of_db = ListOfDatabases()
         if database_name in list_of_db.get_database_names():
@@ -67,6 +68,8 @@ class DatabaseStorage:
             list_of_db.add_database_names(database_name)
             # Now if we need to create/update/read a collection, we shall do so.
             self.create_file(collection_name)
+            # Create index for the collection
+
         else:
             raise Exception("Could not create database at the location provided.")
        

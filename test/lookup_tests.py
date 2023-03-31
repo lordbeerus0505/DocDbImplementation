@@ -9,12 +9,14 @@ from crud.update import Update
 col1 = DatabaseStorage('/Users/sriramrao/Documents/Spring 2023/Databases/Project/DocDbImplementation', 'database1', 'collection1')
 
 col1.storage['_data'].append({
+    "_id": "1",
     "name": "rommel",
     "blk_no": 12,
     "street" : "dewey street",
     "city" : "olongapo"
 })
 col1.storage['_data'].append({
+    "_id": "2",
     "name": "gary",
     "blk_no": 15,
     "street" : "gordon street",
@@ -25,12 +27,14 @@ col1.write_file()
 col2 = DatabaseStorage('/Users/sriramrao/Documents/Spring 2023/Databases/Project/DocDbImplementation', 'database1', 'collection2')
 
 col2.storage['_data'].append({
+    "_id": "1",
     "contact_name": "rommel",
     "age": 37,
     "sex" : "male",
     "citizenship" : "Filipino"
 })
 col2.storage['_data'].append({
+    "_id": "2",
     "contact_name": "gary",
     "age": 32,
     "sex" : "male",
