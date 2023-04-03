@@ -4,6 +4,7 @@ Design decision on when to call write to disk is yet to be determined but at thi
 let it happen after each successful operation.
 """
 import random
+import time
 import string
 import threading
 from memory import DatabaseStorage
@@ -13,6 +14,8 @@ class Insert:
         self.db = None
         self.start_commit = False
         self.interval = interval
+        self.commitLock = threading.Lock()
+        self.writeLock = threading.Lock()
 
     def writeToDisk(self):
         self.db.write_file()
@@ -25,8 +28,14 @@ class Insert:
 
     def commit(self,):
         self.runtime = threading.Timer(self.interval, self.commit)
+        while self.writeLock.locked():
+            pass
+        # Acquire the commit lock
+        self.commitLock.acquire()
         self.runtime.start()
+        print("committing...")
         self.writeToDisk()
+        self.commitLock.release()
 
     def insert_one(self, database: str, collection_name: str, payload: dict, database_location: str = './', group_commit: bool = False):
         # Caching the database from the past
@@ -38,6 +47,10 @@ class Insert:
             self.start_commit = True
             self.commit()
 
+        while self.commitLock.locked():
+            pass
+        # Acquire the write lock
+        self.writeLock.acquire()
         # Check for duplicates by Primary Key
         if "_id" not in payload:
             payload['_id']= ''.join(random.choices(string.ascii_letters + string.digits, k=38))
@@ -49,6 +62,7 @@ class Insert:
             raise Exception('Key Conflict, Alter the Primary Key and try again')
         
         self.db.storage['_data'][payload['_id']] = payload
+        self.writeLock.release()
         if not group_commit:
             self.db.write_file()
         return "OK"
