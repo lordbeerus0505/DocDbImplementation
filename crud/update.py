@@ -15,7 +15,6 @@ class Update:
         self.start_commit = False
         self.writeLock = threading.Lock()
         self.commitLock = threading.Lock()
-
     def writeToDisk(self):
         self.db.write_file()
     
@@ -48,6 +47,7 @@ class Update:
             pass
         # Acquire the write lock
         self.writeLock.acquire()
+
         if '_id' in payload:
             self.db = DatabaseStorage(database_location=database_location, database_name= database, collection_name= collection_name)
             # TODO: This forces the creation of a database and collection if they dont exist. 
@@ -68,6 +68,7 @@ class Update:
             if self.start_commit:
                 self.stop_commit()
             self.writeLock.release()
+
             raise Exception("Key not found")
 
         else:

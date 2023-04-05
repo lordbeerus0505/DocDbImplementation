@@ -72,6 +72,7 @@ class Insert:
         db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name)
         if '_data' not in db.storage:
             raise Exception("Issues with the collection")
+
         for payload in payloads:
             if "_id" not in payload:
                 payload['_id']= ''.join(random.choices(string.ascii_letters + string.digits, k=38))
@@ -83,4 +84,5 @@ class Insert:
             db.storage['_data'][payload['_id']] = payload
         if not group_commit:
             db.write_file()
+
         return "OK"
