@@ -7,6 +7,7 @@ sys.path.append('./')
 import os
 from indexing.constants import *
 import json
+import bson
 from memory import DatabaseStorage
 class CreateIndex:
     def __init__(self, database_location = './', database_name = 'database1', collection_name = 'collections1', fields = []) -> None:
@@ -54,7 +55,7 @@ class CreateIndex:
         This is true for text search may not be true for the others so implementers do think about it.
         """
         self.db = DatabaseStorage(database_location=self.database_location, database_name=self.database_name, collection_name=self.collection_name)
-        self.collection_index_name = f'{self.collection_name}_{index_type}_index.json'
+        self.collection_index_name = f'{self.collection_name}_{index_type}_index.bson'
         self.create_index_file()
         if index_type == SEARCH:
             self.handle_search()
@@ -71,15 +72,18 @@ class CreateIndex:
             fd = open(file_path, 'w+')
             self.index_storage = dict()
         else:
-            fd = open(file_path, 'a+')
-            fd.seek(0)
-            self.index_storage = json.load(fd)
+            with open(file_path, "rb") as f:
+                self.index_storage = bson.BSON.decode(f.read())
     
     def write_index_file(self):
         """
             Write the contents of self.index_storage to the file.
         """
-        json.dump(self.index_storage, 
-            open(f'{self.database_location}/{self.database_name}/{INDEXES}/{self.collection_index_name}', 'w'),
-            indent=4)
+        data = bson.BSON.encode(self.index_storage)
+        with open(f'{self.database_location}/{self.database_name}/{INDEXES}/{self.collection_index_name}', 'wb') as f:
+            f.write(data)
+
+        # json.dump(self.index_storage, 
+        #     open(f'{self.database_location}/{self.database_name}/{INDEXES}/{self.collection_index_name}', 'w'),
+        #     indent=4)
 
