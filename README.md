@@ -21,3 +21,21 @@ use test/CS541DB
 db.mock_collections.createIndex(["last_name", "first_name"])
 db.mock_collections.search("Echallier")
 ```
+
+#### Containers
+First create the dockerfile.
+To execute - 
+```
+If image doesnt already exist -
+docker build -it docsdbi1 .
+./docker_run.sh
+```
+
+
+To clean up - 
+```
+docker ps -a | grep <container name>
+docker stop <containerid>
+docker rm <containerid>
+docker rmi <image name>
+```
