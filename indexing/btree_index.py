@@ -96,6 +96,16 @@ class Indexes:
             print(err)
             return None
     
+    def range_search(self, database, collection, keys, start, end):
+        try:
+            indexes = self.indexes[database][collection]
+            for index in indexes:
+                if index == tuple(keys):
+                    return indexes[index].index.values(start, end)
+        except Exception as err:
+            print(err)
+            return None
+    
 class BTreeIndex:
     def __init__(self):
         self.index = OOBTree()
@@ -107,7 +117,7 @@ class BTreeIndex:
         for key, value in coll.items():
             # Update the BTree index
             if index_key in value:
-                self.index.update({value[index_key]: index_key})
+                self.index.update({value[index_key]: value})
 
     # Update the index - Currently supports a single key update only
     def update_index(self, values, keys):
