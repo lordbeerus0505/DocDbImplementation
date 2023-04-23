@@ -69,8 +69,8 @@ class Insert:
     
     def insert_many(self, database: str, collection_name: str, payloads: dict, database_location: str = './', group_commit: bool = False):
         # creates the database and the collection if they dont exist as well.
-        db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name)
-        if '_data' not in db.storage:
+        self.db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name)
+        if '_data' not in self.db.storage:
             raise Exception("Issues with the collection")
 
         for payload in payloads:
@@ -81,8 +81,8 @@ class Insert:
                 raise Exception("Issues with the collection")
             if payload['_id'] in self.db.storage['_data'].keys():
                 raise Exception('Key Conflict, Alter the Primary Key and try again')
-            db.storage['_data'][payload['_id']] = payload
+            self.db.storage['_data'][payload['_id']] = payload
         if not group_commit:
-            db.write_file()
+            self.db.write_file()
 
         return "OK"
