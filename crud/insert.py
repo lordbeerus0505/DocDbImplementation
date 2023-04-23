@@ -37,18 +37,19 @@ class Insert:
         self.writeToDisk()
         self.commitLock.release()
 
-    def insert_one(self, database: str, collection_name: str, payload: dict, database_location: str = './', group_commit: bool = False):
+    def insert_one(self, database: str, collection_name: str, payload: dict, database_location: str = './', group_commit: bool = False, write_to_catalog: bool = False):
         # Caching the database from the past
         if not group_commit:
-            self.db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name)
+            self.db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name, catalog=write_to_catalog)
         elif (group_commit and not self.start_commit):
             # creates the database and the collection if they dont exist as well.
-            self.db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name)
+            self.db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name, catalog=write_to_catalog)
             self.start_commit = True
             self.commit()
 
         while self.commitLock.locked():
             pass
+
         # Acquire the write lock
         self.writeLock.acquire()
         # Check for duplicates by Primary Key
@@ -61,6 +62,15 @@ class Insert:
         if payload['_id'] in self.db.storage['_data'].keys():
             raise Exception('Key Conflict, Alter the Primary Key and try again')
         
+        if write_to_catalog:
+            catalog = self.db.catalog
+            for attr in payload.keys():
+                if attr in catalog:
+                    catalog[attr]["min"] = min(catalog[attr]["min"], payload[attr])
+                    catalog[attr]["max"] = max(catalog[attr]["max"], payload[attr])
+                else:
+                    catalog[attr] = {"min" : payload[attr], "max": payload[attr]}
+
         self.db.storage['_data'][payload['_id']] = payload
         self.writeLock.release()
         if not group_commit:

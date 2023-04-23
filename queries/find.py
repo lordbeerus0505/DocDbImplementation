@@ -94,7 +94,19 @@ class FindQuery:
             self.select_results.append(data_map[element])
 
             
-        
+    def short_circuit(self, collection, catalog, select_query):
+        """
+            If query has > < symbols, check with min and max for the attribute
+            If outside it will reject
+        """
+        for field, constraints in select_query.items():
+            for attr,val in constraints.items():
+                if attr in catalog:
+                    if attr in ['gt', 'geq'] and catalog[attr]["max"] < val:
+                        return False
+                    elif attr in ['lt', 'leq'] and catalog[attr]["min"] > val:
+                        return False
+
 
     def find_handler(self, collection, select_query, project_query):
         """

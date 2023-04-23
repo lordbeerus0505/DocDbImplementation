@@ -36,6 +36,8 @@ class DatabaseStorage:
     database = ''
     storage = None
     collection_name = None
+    catalog = None
+    catalog_name = None
     def create_directory(self,directory_path):
         """
         Provide an absolute path for the directory that is to be created.
@@ -50,7 +52,7 @@ class DatabaseStorage:
         self.database = directory_path
         return True
 
-    def __init__(self, database_location='./', database_name='database1', collection_name=None, index_keys = None):
+    def __init__(self, database_location='./', database_name='database1', collection_name=None, index_keys = None, catalog = None):
         """
         Database_location provides path of the directory where the database is to be stored
         Collection_name is the name of the collection to create if any. Its possible that
@@ -69,6 +71,7 @@ class DatabaseStorage:
             # Now if we need to create/update/read a collection, we shall do so.
             self.create_file(collection_name)
             # Create index for the collection
+            self.create_catalog(collection_name+"_catalog")
 
         else:
             raise Exception("Could not create database at the location provided.")
@@ -92,6 +95,27 @@ class DatabaseStorage:
                 with open(f'{self.database}/{collection_name}.bson', "rb") as f:
                     self.storage = bson.BSON.decode(f.read())
             self.collection_name = collection_name
+    
+    def create_catalog(self, catalog_name):
+        """
+            returns a file descriptor for the catalog with the name provided
+        """
+        if catalog_name:
+            if not os.path.exists(f'{self.database}/{catalog_name}.json')\
+                or os.stat(f'{self.database}/{catalog_name}.json').st_size == 0:
+                import datetime
+                fd = open(f'{self.database}/{catalog_name}.json', "w")
+                fd.close() # just create a file so another request to same method doesnt end up here.
+                self.catalog = json.loads('''{
+                    "_metadata": {"catalog_name": "%s", "creation_time": "%s"},
+                    "_data" : {}
+                }'''%(catalog_name, datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")))
+            else:
+
+                with open(f'{self.database}/{catalog_name}.json', "r") as f:
+                    self.catalog = json.load(f)
+            self.catalog_name = catalog_name
+
 
     def write_file(self):
         """
@@ -101,3 +125,7 @@ class DatabaseStorage:
         data = bson.BSON.encode(self.storage)
         with open(f'{self.database}/{self.collection_name}.bson', 'wb') as f:
             f.write(data)
+        
+        data = self.catalog
+        with open(f"{self.database}/{self.catalog_name}.json", "w") as f:
+            f.write(json.dumps(data, indent=4))
