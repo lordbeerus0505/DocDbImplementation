@@ -64,19 +64,19 @@ class Chunkify:
                     total_files = total_files + 1
                     # print (os.path.getsize(f'{self.collection_path}/{f}')," - file size of ", f)
                     if os.path.getsize(f'{self.collection_path}/{f}') > CHUNK_SIZE:
-                        print (f," file in ",self.collection_name," seems messed up in terms of size. Please check")
+                        print (f," file in ",self.collection_name," seems messed up in terms of size. Please check1")
                         return 0
         
         if len(metadata['Indexed']) != total_files:
-            print (self.collection_name,"in",self.database_name,"database seems messed up. Please check")
+            print (self.collection_name,"in",self.database_name,"database seems messed up. Please check2")
             return 0
         
         if len(metadata['Space_left_in_file']) != total_files:
-            print (self.collection_name,"in",self.database_name,"database seems messed up. Please check")
+            print (self.collection_name,"in",self.database_name,"database seems messed up. Please check3")
             return 0
         
         if len(metadata['File_List_In_Sequence']) != total_files:
-            print (self.collection_name,"in",self.database_name,"database seems messed up. Please check")
+            print (self.collection_name,"in",self.database_name,"database seems messed up. Please check4")
             return 0
         
         return 1
@@ -96,10 +96,11 @@ class Chunkify:
                 break
 
         if free_index == -1:
-            # print("Looking for new file")
             free_file_name = self.add_file()
+            print("Looking for new file - ", free_file_name)
         else:
             free_file_name = self.collection_name + "_" + str(free_index) + ".json"
+            print ("Using this file - ", free_file_name)
 
         return free_file_name
     
@@ -136,15 +137,20 @@ class Chunkify:
         metadata = metadata_old
         new_file_name = ""
 
-        if not self.verifyer():
+        if self.verifyer():
+            print ("Here looking for new file")
             new_file_name = self.collection_name + "_" + str(len(metadata['File_List_In_Sequence'])) + ".json"
             metadata['File_List_In_Sequence'].append(new_file_name)
             metadata['Space_left_in_file'].append(CHUNK_SIZE)
             metadata['Indexed'].append(0)
             metadata['TS_Last_Modified'].append("NOW")
 
-            with open(f'{self.collection_path}/{new_file_name}','w'):
-                pass
+            vanilla_file = {}
+            vanilla_file["_metadata"]= {"collection_name": self.collection_name}
+            vanilla_file["_data"] = {}
+
+            with open(f'{self.collection_path}/{new_file_name}','w') as f:
+                json.dump(vanilla_file,f, indent = 4)
 
             with open(f'{self.collection_path}/{META_DATA_FILE_NAME}', 'w') as f:
                 json.dump(metadata, f, indent = 4)
