@@ -143,6 +143,20 @@ class Indexes:
             return None
     
     """
+    Does a lazy update of all the indexes
+    """
+    def lazy_update(self):
+        for database in self.indexes:
+            for collection in self.indexes[database]:
+                for index in self.indexes[database][collection]:
+                    curr_index = self.indexes[database][collection][index]
+                    # Update the index from the memory to the disk
+                    index_name = curr_index.index_name
+                    file = open(index_name, 'wb')
+                    pickle.dump(curr_index, file)
+                    file.close()
+
+    """
     coords: list or tuple of 2 or 3 values used as coords for 2D or 3D 
     k: The number of nearest neighbours to return
     """
@@ -152,7 +166,8 @@ class Indexes:
             index_name = database + collection
             for key in keys:
                 index_name = index_name + key
-            
+            # index_name = index_name + '.idx'
+
             # Open the index file
             file_idx = index.Rtree(index_name)
             
@@ -170,7 +185,8 @@ class Indexes:
             index_name = database + collection
             for key in keys:
                 index_name = index_name + key
-            
+            # index_name = index_name + '.idx'
+
             # Open the index file
             file_idx = index.Rtree(index_name)
             tuples = [n.object for n in file_idx.intersection(bounds, objects=True)]
@@ -184,6 +200,7 @@ class BTreeIndex:
     def __init__(self):
         self.index = OOBTree()
         self.index_file = None
+        self.index_name = 
 
     """ Given a collection file and the keys to use in index, create a BTree index"""
     def create_single_key_index(self, database, collection, index_key):
@@ -195,6 +212,7 @@ class BTreeIndex:
                 self.index.update({value[index_key]: value})
 
         # Create a persistent index storage file on disk
+        self.index_name = database + collection + index_key + '.idx'
         self.index_file = open(database + collection + index_key + '.idx', 'wb')
         pickle.dump(self.index, self.index_file)
         self.index_file.close()
