@@ -71,22 +71,22 @@ class DatabaseStorage:
             list_of_db.add_database_names(database_name)
             # Now if we need to create/update/read a collection, we shall do so.
             if os.path.exists(f'{database_location}/{database_name}/{collection_name}/') and os.path.isdir(f'{database_location}/{database_name}/{collection_name}/'):
-                print ("Colleciton already exists")
+                x = 1
             else:
                 os.makedirs(f'{database_location}/{database_name}/{collection_name}/')
                                 
             # self.chunk_create_file(collection_name)
-            # self.create_file(collection_name)
+            self.create_file(collection_name)
             # Create index for the collection
         else:
             raise Exception("Could not create database at the location provided.")
         
         chunkz = Chunkify(database_name = database_name, collection_name = collection_name)
 
-        self.storage = json.loads('''{
-                    "_metadata": {"collection_name": "%s"},
-                    "_data" : {}
-                }'''%(collection_name))
+        # self.storage = json.loads('''{
+        #             "_metadata": {"collection_name": "%s"},
+        #             "_data" : {}
+        #         }'''%(collection_name))
         
     def chunk_create_file(self, collection_name):
         """
@@ -134,7 +134,7 @@ class DatabaseStorage:
 
         data = bson.BSON.encode(self.storage)
         # chunkz = Chunkify(database_name = database_name, collection_name = collection_name)
-        print (self.storage)
+        # print (self.storage)
         with open(f'{self.database}/{self.collection_name}.bson', 'wb') as f:
             f.write(data)
     
@@ -148,11 +148,6 @@ class DatabaseStorage:
         #UPDATE THE CHUNK
         self.storage['_data'][payload['_id']] = payload
         #WRITE THE CHUNK
-        print ("Writing to file - ", file_to_write)
-        print ("Storage now is - ", self.storage)
-        # data = bson.BSON.encode(self.storage)
-        # with open(f'{database_name}/{self.collection_name}/{file_to_write}', 'wb') as f:
-            # f.write(data)
         with open(f'{self.database}/{collection_name}/{file_to_write}','w') as f:
             json.dump(self.storage,f, indent = 4)
         

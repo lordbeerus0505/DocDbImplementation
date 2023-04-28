@@ -40,40 +40,32 @@ class Insert:
     def insert_one(self, database: str, collection_name: str, payload: dict, database_location: str = './', group_commit: bool = False):
         # Caching the database from the past
         if not group_commit:
-            print ("Pass 1")
             self.db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name)
         elif (group_commit and not self.start_commit):
             # creates the database and the collection if they dont exist as well.
             self.db = DatabaseStorage(database_location= database_location, database_name= database, collection_name= collection_name)
             self.start_commit = True
-            print ("Pass 2")
             self.commit()
 
         while self.commitLock.locked():
             pass
         # Acquire the write lock
         self.writeLock.acquire()
-        print ("Pass 3")
         # Check for duplicates by Primary Key
         if "_id" not in payload:
-            print ("Pass 4")
             payload['_id']= ''.join(random.choices(string.ascii_letters + string.digits, k=38))
         # Make sure the '_id' isnt in the database already, if it is, raise Exception
         if '_data' not in self.db.storage:
-            print ("Pass 5")
             raise Exception("Issues with the collection")
         
         if payload['_id'] in self.db.storage['_data'].keys():
-            print ("Pass 6")
             raise Exception('Key Conflict, Alter the Primary Key and try again')
         
         self.db.storage['_data'][payload['_id']] = payload
         self.writeLock.release()
-        print ("Pass 7")
         if not group_commit:
-            print ("Pass 8")
-            # self.db.write_file()
-            self.db.write_file_chunk(database, collection_name, payload)
+            self.db.write_file()
+            # self.db.write_file_chunk(database, collection_name, payload)
         return "OK"
     
     def insert_many(self, database: str, collection_name: str, payloads: dict, database_location: str = './', group_commit: bool = False):
