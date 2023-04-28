@@ -96,7 +96,6 @@ class Chunkify:
                 break
 
         if free_index == -1:
-            # print("Looking for new file")
             free_file_name = self.add_file()
         else:
             free_file_name = self.collection_name + "_" + str(free_index) + ".json"
@@ -136,15 +135,19 @@ class Chunkify:
         metadata = metadata_old
         new_file_name = ""
 
-        if not self.verifyer():
+        if self.verifyer():
             new_file_name = self.collection_name + "_" + str(len(metadata['File_List_In_Sequence'])) + ".json"
             metadata['File_List_In_Sequence'].append(new_file_name)
             metadata['Space_left_in_file'].append(CHUNK_SIZE)
             metadata['Indexed'].append(0)
             metadata['TS_Last_Modified'].append("NOW")
 
-            with open(f'{self.collection_path}/{new_file_name}','w'):
-                pass
+            vanilla_file = {}
+            vanilla_file["_metadata"]= {"collection_name": self.collection_name}
+            vanilla_file["_data"] = {}
+
+            with open(f'{self.collection_path}/{new_file_name}','w') as f:
+                json.dump(vanilla_file,f, indent = 4)
 
             with open(f'{self.collection_path}/{META_DATA_FILE_NAME}', 'w') as f:
                 json.dump(metadata, f, indent = 4)

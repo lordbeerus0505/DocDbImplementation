@@ -1,6 +1,9 @@
 import json
 import os
 import bson
+import sys
+from chunks import constants
+from chunks.chunkify import Chunkify
 
 class ListOfDatabases:
     """
@@ -67,11 +70,42 @@ class DatabaseStorage:
         if self.create_directory(f'{database_location}/{database_name}/'):
             list_of_db.add_database_names(database_name)
             # Now if we need to create/update/read a collection, we shall do so.
+            # if os.path.exists(f'{database_location}/{database_name}/{collection_name}/') and os.path.isdir(f'{database_location}/{database_name}/{collection_name}/'):
+            #     x = 1
+            # else:
+            #     os.makedirs(f'{database_location}/{database_name}/{collection_name}/')
+                                
+            # self.chunk_create_file(collection_name)
             self.create_file(collection_name)
             # Create index for the collection
-
         else:
             raise Exception("Could not create database at the location provided.")
+        
+        # chunkz = Chunkify(database_name = database_name, collection_name = collection_name)
+
+        # self.storage = json.loads('''{
+        #             "_metadata": {"collection_name": "%s"},
+        #             "_data" : {}
+        #         }'''%(collection_name))
+        
+    def chunk_create_file(self, collection_name):
+        """
+            returns a file descripter if a collection_name was provided.
+        """
+        if collection_name:
+            if not os.path.exists(f'{self.database}/{collection_name}/{collection_name}_0.bson')\
+                or os.stat(f'{self.database}/{collection_name}/{collection_name}_0.bson').st_size == 0:
+                import datetime
+                fd = open(f'{self.database}/{collection_name}/{collection_name}_0.bson', "wb")
+                fd.close() # just create a file so another request to same method doesnt end up here.
+                self.storage = json.loads('''{
+                    "_metadata": {"collection_name": "%s", "creation_time": "%s"},
+                    "_data" : {}
+                }'''%(collection_name, datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")))
+            else:
+                with open(f'{self.database}/{collection_name}/{collection_name}.bson', "rb") as f:
+                    self.storage = bson.BSON.decode(f.read())
+            self.collection_name = collection_name
        
     def create_file(self, collection_name):
         """
@@ -101,3 +135,26 @@ class DatabaseStorage:
         data = bson.BSON.encode(self.storage)
         with open(f'{self.database}/{self.collection_name}.bson', 'wb') as f:
             f.write(data)
+    
+    def write_file_chunk(self, database_name, collection_name, payload):
+
+        print ("Storage now is - ", self.storage)
+        chunkz = Chunkify(database_name = database_name, collection_name = collection_name)
+        file_to_write = chunkz.free_files_search(sys.getsizeof(json.dumps(self.storage)))
+        #READ THE CHUNK
+        self.read_file_chunk(database_name, collection_name, file_to_write)
+        #UPDATE THE CHUNK
+        self.storage['_data'][payload['_id']] = payload
+        #WRITE THE CHUNK
+        with open(f'{self.database}/{collection_name}/{file_to_write}','w') as f:
+            json.dump(self.storage,f, indent = 4)
+        
+        chunkz.modify_file(file_to_write)
+    
+    def read_file_chunk(self, database_name, collection_name, chunk_name):
+
+        # with open(f'{self.database}/{collection_name}/{collection_name}/{chunk_name}', "rb") as f:
+        #     self.storage = bson.BSON.decode(f.read())
+        chunk_file = open(f'{database_name}/{collection_name}/{chunk_name}')
+        self.storage = json.load(chunk_file)
+        chunk_file.close()
