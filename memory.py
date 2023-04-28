@@ -70,10 +70,10 @@ class DatabaseStorage:
         if self.create_directory(f'{database_location}/{database_name}/'):
             list_of_db.add_database_names(database_name)
             # Now if we need to create/update/read a collection, we shall do so.
-            if os.path.exists(f'{database_location}/{database_name}/{collection_name}/') and os.path.isdir(f'{database_location}/{database_name}/{collection_name}/'):
-                x = 1
-            else:
-                os.makedirs(f'{database_location}/{database_name}/{collection_name}/')
+            # if os.path.exists(f'{database_location}/{database_name}/{collection_name}/') and os.path.isdir(f'{database_location}/{database_name}/{collection_name}/'):
+            #     x = 1
+            # else:
+            #     os.makedirs(f'{database_location}/{database_name}/{collection_name}/')
                                 
             # self.chunk_create_file(collection_name)
             self.create_file(collection_name)
@@ -133,8 +133,6 @@ class DatabaseStorage:
         """
 
         data = bson.BSON.encode(self.storage)
-        # chunkz = Chunkify(database_name = database_name, collection_name = collection_name)
-        # print (self.storage)
         with open(f'{self.database}/{self.collection_name}.bson', 'wb') as f:
             f.write(data)
     
