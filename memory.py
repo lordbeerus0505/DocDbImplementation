@@ -81,7 +81,7 @@ class DatabaseStorage:
         else:
             raise Exception("Could not create database at the location provided.")
         
-        chunkz = Chunkify(database_name = database_name, collection_name = collection_name)
+        # chunkz = Chunkify(database_name = database_name, collection_name = collection_name)
 
         # self.storage = json.loads('''{
         #             "_metadata": {"collection_name": "%s"},
