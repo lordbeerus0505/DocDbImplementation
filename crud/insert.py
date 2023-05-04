@@ -65,6 +65,7 @@ class Insert:
         self.writeLock.release()
         if not group_commit:
             self.db.write_file()
+            # self.db.write_file_chunk(database, collection_name, payload)
         return "OK"
     
     def insert_many(self, database: str, collection_name: str, payloads: dict, database_location: str = './', group_commit: bool = False):
