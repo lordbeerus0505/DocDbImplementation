@@ -10,7 +10,8 @@ from rtree import index
 import math
 import pickle 
 import sys
-sys.setrecursionlimit(10000)
+# Set recursion limit to 10000
+sys.setrecursionlimit(100000)
 
 # # Create a Driver license collection 1
 # col1 = DatabaseStorage('/Users/sriramrao/Documents/Spring 2023/Databases/Project/DocDbImplementation', 'database1', 'collection1')
@@ -19,12 +20,12 @@ sys.setrecursionlimit(10000)
 # ins = Insert()
 
 # payloads = []
-# for i in range(1000000):
+# for i in range(100000):
 #     payload = {
 #         'name' : 'Peter',
 #         '_id' : str(i),
 #         'age' : random.randint(20,100),
-#         'license_number': i+1000000,
+#         'license_number': i+100000,
 #         'location_latitude': random.randint(0,100),
 #         'location_longitude': random.randint(0,100),
 #         'id': i
@@ -36,12 +37,12 @@ sys.setrecursionlimit(10000)
 # col2 = DatabaseStorage('/Users/sriramrao/Documents/Spring 2023/Databases/Project/DocDbImplementation', 'database1', 'collection2')
 
 # payloads = []
-# for i in range(1000000):
+# for i in range(100000):
 #     payload = {
 #         'name' : 'Demeter',
 #         '_id' : str(i),
 #         'age' : random.randint(20,100),
-#         'license_number': i+2000000,
+#         'license_number': i+200000,
 #         'location_latitude': random.randint(0,100),
 #         'location_longitude': random.randint(0,100),
 #         'id': i
@@ -51,18 +52,18 @@ sys.setrecursionlimit(10000)
 
 # print("Collections created")
 
-# Create index for both collections 
-# Create index for collection 1
-indexes = Indexes()
-col1_index = indexes.create_single_key_index(database='database1', collection='collection1', keys=['license_number'])
+# # Create index for both collections 
+# # Create index for collection 1
+# indexes = Indexes()
+# col1_index = indexes.create_single_key_index(database='database1', collection='collection1', keys=['license_number'])
 
-# Create index for collection 2
-col2_index = indexes.create_single_key_index(database='database1', collection='collection2', keys=['license_number'])
+# # Create index for collection 2
+# col2_index = indexes.create_single_key_index(database='database1', collection='collection2', keys=['license_number'])
 
-print("Indexes created")
+# print("Indexes created")
 
-# Create index for both collections 
-# Create index for collection 1
+# # Create index for both collections 
+# # Create index for collection 1
 # indexes = Indexes()
 # col1_index = indexes.create_multi_key_index(database='database1', collection='collection1', keys=['location_latitude', 'location_longitude'])
 
@@ -148,64 +149,62 @@ print("Indexes created")
 # ins.insert_one(database='database2', collection_name='collection2', payload=payload1)
 # ins.insert_one(database='database2', collection_name='collection2', payload=payload2)
 
-# Range search query using "age" index on collection 1 - Find folks in age range (25, 60)
+# Range search query using "license registration" index on collection 1 - Find registrations in the range (5000 - 50000)
 
-# # Time the range search
-# indexes = Indexes()
-# col1 = DatabaseStorage('/Users/sriramrao/Documents/Spring 2023/Databases/Project/DocDbImplementation', 'database1', 'collection1')
+# Time the range search
+indexes = Indexes()
+col1 = DatabaseStorage('/Users/sriramrao/Documents/Spring 2023/Databases/Project/DocDbImplementation', 'database1', 'collection1')
 
-# start_time = timeit.default_timer()
-# # Get index from pickle file
-# file = open('database1collection1age.idx', 'rb')
-# index = pickle.load(file)
-# print(len(list(index.values())))
+start_time = timeit.default_timer()
 
-# query_result = indexes.range_search(database='database1', collection='collection1', keys = ['age'], start=25, end=60)
-# elapsed = timeit.default_timer() - start_time
-# print("Time for range search with index: {}".format(elapsed))
+query_result = indexes.range_search(database='database1', collection='collection1', keys = ['license_number'], start=105000, end=150000)
+elapsed = timeit.default_timer() - start_time
+print("Time for range search with index: {}".format(elapsed))
 
-# print(len(list(query_result)))
+print("{} results returned".format(len(list(query_result))))
 
-# # Time the range search without index
-# start_time = timeit.default_timer()
-# # Get a query handler
-# query_handler = QueryHandler()
+# Time the range search without index
+start_time = timeit.default_timer()
+# Get a query handler
+query_handler = QueryHandler()
 
-# # Execute a find query for the range search
-# query_result = query_handler.handle_query('find', [
-#     {
-#         'age' : {
-#             'AND': [
-#                 {
-#                     'leq': 60
-#                 }, {
-#                     'geq': 25
-#                 }
-#             ]
-#         }, 
-#     }, {'name' : 1, 'age': 1}
-# ], col1.storage, return_as_json=True)
+# Execute a find query for the range search
+query_result = query_handler.handle_query('find', [
+    {
+        'license_number' : {
+            'AND': [
+                {
+                    'leq': 150000
+                }, {
+                    'geq': 105000
+                }
+            ]
+        }, 
+    }, {'name' : 1, 'license_number': 1}
+], col1.storage, return_as_json=True)
 
-# elapsed = timeit.default_timer() - start_time
-# print("Time for range search without index: {}".format(elapsed))
+elapsed = timeit.default_timer() - start_time
+print("Time for range search without index: {}".format(elapsed))
 
-# print(len(query_result))
+print("{} results returned".format(len(query_result)))
 
-# Multi attribute Rtree query
-# file_idx = index.Rtree('database1collection1location_latitudelocation_longitude')
+# # Multi attribute Rtree query
+# file_idx = index.Rtree('database1collection1location_latitudelocation_longitude.idx')
 # nearest = [n.object for n in file_idx.nearest((10, 10, 10, 10), 1, objects=True)]
 # print(nearest)
 
-# # Multi attribute Rtree - Example 1 - Nearest neighbour
+# # Multi attribute Rtree - Example 1 - Nearest neighbour - 10 nearest points to (10, 10) location
 # indexes = Indexes()
 # # Time the nearest neighbours search
 # start_time = timeit.default_timer()
-# nearest = indexes.nearest_neighbour(database='database1', collection='collection1', keys=['location_latitude', 'location_longitude'], coords=(10, 10), k=10)
+# nearest = indexes.nearest_neighbour(database='database1', collection='collection1', \
+#                                     keys=['location_latitude', 'location_longitude'], coords=(10, 10), k=10)
 # end_time = timeit.default_timer()
 # elapsed = end_time - start_time
 # print("Time for nearest neighbour search with index: {}".format(elapsed))
 # # Print only the ids of the nearest objects
-# print([item['_id'] for item in nearest])
+# results = [item['_id'] for item in nearest]
+# print(results)
 
 # # Time for nearest neighbour search whout the index
 # start_time = timeit.default_timer()
@@ -228,8 +227,12 @@ print("Indexes created")
 # # Sort the list based on the distance - (O(nlogn))
 # distances.sort(key=lambda x: x[1])
 
-# # Return the first 10 elements
-# nearest_ids = distances[:14]
+# # Return the first 10 elements and return the elements with same distance as the last element
+# nearest_ids = distances[:10]
+# for i in range(10, 100000):
+#     if distances[i][1] == distances[9][1]:
+#         nearest_ids.append(distances[i])
+
 # # Get the nearest objects from the IDs and data
 # nearest = []
 # for item in nearest_ids:
@@ -238,43 +241,46 @@ print("Indexes created")
 # end_time = timeit.default_timer()
 # elapsed = end_time - start_time
 # print("Time for nearest neighbour search without index: {}".format(elapsed))
-# print(list([item[0] for item in nearest_ids]))
+# result = list([item[0] for item in nearest_ids])
+# print(result)
 
-# # Multi attribute Rtree - Example 2 range search 2D
-# # Time the range search
-# indexes = Indexes()
-# start_time = timeit.default_timer()
-# bounds = (10, 10, 20, 20)
-# query_result = indexes.range_search_d(database='database1', collection='collection1', keys = ['location_latitude', 'location_longitude'], bounds=bounds)
-# elapsed = timeit.default_timer() - start_time
-# print("Time for range search with index: {}".format(elapsed))
-# # Print only the ids of the query result
-# print([item['_id'] for item in query_result])
+# Multi attribute Rtree - Example 2 range search 2D
+# Time the range search
+indexes = Indexes()
+start_time = timeit.default_timer()
+bounds = (10, 10, 20, 20)
+query_result = indexes.range_search_d(database='database1', collection='collection1', \
+                                      keys = ['location_latitude', 'location_longitude'], bounds=bounds)
+elapsed = timeit.default_timer() - start_time
+print("Time for range search with index: {}".format(elapsed))
+# Print only the ids of the query result
+results = [item['_id'] for item in query_result]
+print("Number of results in the bounds is {}".format(len(results)))
 
-# # Range search without index
-# start_time = timeit.default_timer()
-# # Open Collection 1 in Database 1
-# col1 = DatabaseStorage('/Users/sriramrao/Documents/Spring 2023/Databases/Project/DocDbImplementation', 'database1', 'collection1')
-# data = col1.storage['_data']
+# Range search without index
+start_time = timeit.default_timer()
+# Open Collection 1 in Database 1
+col1 = DatabaseStorage('/Users/sriramrao/Documents/Spring 2023/Databases/Project/DocDbImplementation', 'database1', 'collection1')
+data = col1.storage['_data']
 
-# # Store lat, long and _id in a list as a tuple
-# input_list = []
-# for key, value in data.items():
-#     input_list.append((data[key]['_id'], data[key]['location_latitude'], data[key]['location_longitude']))
+# Store lat, long and _id in a list as a tuple
+input_list = []
+for key, value in data.items():
+    input_list.append((data[key]['_id'], data[key]['location_latitude'], data[key]['location_longitude']))
 
-# # Check if the point is within the bounds - O(n)
-# query_result_ids = []
-# for item in input_list:
-#     if item[1] >= bounds[0] and item[1] <= bounds[2] and item[2] >= bounds[1] and item[2] <= bounds[3]:
-#         query_result_ids.append(item[0])
+# Check if the point is within the bounds - O(n)
+query_result_ids = []
+for item in input_list:
+    if item[1] >= bounds[0] and item[1] <= bounds[2] and item[2] >= bounds[1] and item[2] <= bounds[3]:
+        query_result_ids.append(item[0])
 
-# end_time = timeit.default_timer()
-# elapsed = end_time - start_time
-# print("Time for range search without index: {}".format(elapsed))
+end_time = timeit.default_timer()
+elapsed = end_time - start_time
+print("Time for range search without index: {}".format(elapsed))
 
-# # Get the query results from the IDs
-# query_result = []
-# for item in query_result_ids:
-#     query_result.append(data[item])
+# Get the query results from the IDs
+query_result = []
+for item in query_result_ids:
+    query_result.append(data[item])
 
-# print(query_result_ids)
+print("Number of results in the bounds is {}".format(len(query_result)))

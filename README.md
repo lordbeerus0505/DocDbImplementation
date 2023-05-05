@@ -38,4 +38,20 @@ docker ps -a | grep <container name>
 docker stop <containerid>
 docker rm <containerid>
 docker rmi <image name>
+
 ```
+
+#### Indexes 
+We have implemented 2 classes of indexing - B-tree and RTree(Multi-attribute indexing)
+
+They have not been included in the CLI yet. Their usage is defined with comments and examples in test/indexing folder.
+
+Functionalities implemented using index trees:
+1. Range search using BTrees
+2. 2D and 3D range search (Finding points in a rectangular bounding box) using RTrees
+3. Finding nearest neighbour in 2D and 3D space.
+
+Other features:'
+1. The indexes are persistent indexes - They are stored in the disk as ".idx" files.
+
+Future work: Include indexing in CLI.
