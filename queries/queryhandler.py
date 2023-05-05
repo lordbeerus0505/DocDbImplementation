@@ -23,7 +23,7 @@ class QueryHandler:
         if query_type == 'find':
             fq = FindQuery()
             fq.find_handler(collection, *query)
-            # print(json.dumps(fq.project_results, indent=4))
+            print(json.dumps(fq.project_results, indent=4))
             if return_as_json:
                 return fq.project_results
         elif query_type == 'lookup':

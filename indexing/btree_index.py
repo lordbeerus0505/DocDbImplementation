@@ -200,7 +200,7 @@ class BTreeIndex:
     def __init__(self):
         self.index = OOBTree()
         self.index_file = None
-        self.index_name = 
+        self.index_name = None
 
     """ Given a collection file and the keys to use in index, create a BTree index"""
     def create_single_key_index(self, database, collection, index_key):
